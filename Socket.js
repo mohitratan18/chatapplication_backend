@@ -14,6 +14,8 @@ const addusers = (user,socketID)=>{
     onlineusers.push(user)
 }
 
+
+
 const removeuser =(socketID)=>{
     const isExist = onlineusers.findIndex((item)=>item.socketId === socketID);
     if(isExist!==-1){
@@ -31,13 +33,17 @@ const socketInit = (server)=>{
     });
     
     io.on("connection",(socket)=>{
+
+
         socket.on("ADD_USER",(user)=>{
             addusers(user,socket.id);
             io.emit("USERS_ADDED",onlineusers);
         })
         socket.on("SEND_MESSAGE",(data)=>{
             saveMsg(data);
-            io.to(data.receiver.socketId).to(data.sender.socketId).emit("RECEIVE_MSG",data);
+           const receiver =  onlineusers.find((item)=> item._id === data.receiver._id);
+
+            io.to(receiver.socketId).to(data.sender.socketId).emit("RECEIVE_MSG",data);
         })
         socket.on("disconnect", () => {
             removeuser(socket.id);
